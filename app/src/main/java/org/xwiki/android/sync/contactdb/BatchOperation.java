@@ -29,6 +29,8 @@ import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import org.xwiki.android.sync.AppContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,6 +111,12 @@ final public class BatchOperation {
         }
 
         mOperations.clear();
+        for (Uri uri : resultUris) {
+            EditContactContentObserver.subscribeContactUpdates(
+                AppContext.getInstance(),
+                uri
+            );
+        }
         return resultUris;
     }
 }
