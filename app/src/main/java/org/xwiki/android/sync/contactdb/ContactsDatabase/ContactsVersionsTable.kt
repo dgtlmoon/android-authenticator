@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 import android.provider.ContactsContract
+import android.util.Log
 
 private const val contactVersionTableName = "ContactsVersions"
 
@@ -66,15 +67,17 @@ class ContactsVersionsTable(
             while (contactsDataVersionsCursor.moveToNext()) {
                 val rowId = contactsDataVersionsCursor.getLong(
                     rowIdColumnIndex
-                )
+                ).also {
+                    Log.i(this::class.java.simpleName, "rowId: $it")
+                }
                 val mimeType = contactsDataVersionsCursor.getString(
                     mimetypeColumnIndex
                 )
                 databaseHelper.readableDatabase.query(
                     contactVersionTableName,
                     null,
-                    "${ContactsContract.Data.RAW_CONTACT_ID}=\"$rowId\"" +
-                        "AND ${ContactsContract.RawContacts.ACCOUNT_NAME}=\"$accountName\"" +
+                    "${ContactsContract.Data.RAW_CONTACT_ID}=\"$rowId\" " +
+                        "AND ${ContactsContract.RawContacts.ACCOUNT_NAME}=\"$accountName\" " +
                         "AND ${ContactsContract.Data.MIMETYPE}=\"$mimeType\"",
                     null,
                     null,
@@ -82,6 +85,7 @@ class ContactsVersionsTable(
                     null
                 ) ?.use {
                     val idIndex = it.getColumnIndex(BaseColumns._ID)
+                    Log.i(this::class.java.simpleName, "Mime type: $mimeType")
                     if (it.moveToFirst()) {
                         val dataVersion = it.getInt(
                             it.getColumnIndex(ContactsContract.Data.DATA_VERSION)
@@ -91,14 +95,17 @@ class ContactsVersionsTable(
                         )
                         val id = it.getInt(idIndex)
                         if (dataVersion < actualDataVersion) {
+                            Log.i(this::class.java.simpleName, "Will be updated")
                             updateSQL.append("UPDATE $contactVersionTableName ")
                             updateSQL.append("SET ${ContactsContract.Data.DATA_VERSION}=\"$actualDataVersion\" ")
                             updateSQL.append("WHERE ${BaseColumns._ID}=\"$id\";\n")
                             updated.add(rowId)
                         } else {
+                            Log.i(this::class.java.simpleName, "Ignore: $dataVersion >= $actualDataVersion")
                             null
                         }
                     } else {
+                        Log.i(this::class.java.simpleName, "Will be inserted")
                         updateSQL.append("INSERT INTO $contactVersionTableName ")
                         updateSQL.append("(${ContactsContract.Data.RAW_CONTACT_ID},")
                         updateSQL.append("${ContactsContract.RawContacts.ACCOUNT_NAME},")
@@ -119,6 +126,8 @@ class ContactsVersionsTable(
                 )
             }
         }
-        return updated
+        return updated.also {
+            Log.i(this::class.java.simpleName, it.joinToString(prefix = "To update list: ") { it.toString() })
+        }
     }
 }
