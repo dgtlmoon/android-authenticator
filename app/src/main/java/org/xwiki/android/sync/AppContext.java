@@ -22,6 +22,7 @@ package org.xwiki.android.sync;
 import android.app.Application;
 import android.util.Log;
 
+import org.xwiki.android.sync.contactdb.ContactsDatabase.ContactsDatabaseHolder;
 import org.xwiki.android.sync.rest.BaseApiManager;
 import org.xwiki.android.sync.utils.SharedPrefsUtils;
 
@@ -53,6 +54,13 @@ public class AppContext extends Application {
     private static AppContext instance;
 
     /**
+     * Represent work with contacts database
+     *
+     * @since 0.5
+     */
+    private static ContactsDatabaseHolder contactsDB;
+
+    /**
      * @return known AppContext instance
      */
     public static AppContext getInstance() {
@@ -64,6 +72,23 @@ public class AppContext extends Application {
      */
     public static String currentBaseUrl() {
         return SharedPrefsUtils.getValue(instance, Constants.SERVER_ADDRESS, null);
+    }
+
+    /**
+     * @return {@link #contactsDB} if not null or try to create new using {@link #getInstance()} as
+     * context
+     *
+     * @since 0.5
+     */
+    public static ContactsDatabaseHolder getContactsDatabase() {
+        if (contactsDB != null) {
+            return contactsDB;
+        } else {
+            contactsDB = new ContactsDatabaseHolder(
+                getInstance()
+            );
+            return contactsDB;
+        }
     }
 
     /**

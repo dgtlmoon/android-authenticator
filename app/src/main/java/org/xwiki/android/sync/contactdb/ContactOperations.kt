@@ -38,22 +38,24 @@ fun setAccountContactsVisibility(
 /**
  * Search user raw in android contacts. If not exists - will create new one and return this rowId
  *
- * @param resolver Will be used to search exist user or create new one
+ * @param userId Id of user (for example, {@link XWikiUserFull#id})
  * @param accountName Account name for search
+ * @param resolver Will be used to search exist user or create new one
  *
  * @return Row id of user
  *
  * @since 0.5
  */
-fun XWikiUserFull.rowId(
-    resolver: ContentResolver,
-    accountName: String
+fun rowId(
+    userId: String,
+    accountName: String,
+    resolver: ContentResolver
 ): Long {
     resolver.query(
         ContactsContract.RawContacts.CONTENT_URI,
         arrayOf(ContactsContract.Data._ID),
         "${ContactsContract.RawContacts.ACCOUNT_TYPE}=\"${Constants.ACCOUNT_TYPE}\" AND " +
-            "${ContactsContract.RawContacts.SOURCE_ID}=\"$id\"",
+            "${ContactsContract.RawContacts.SOURCE_ID}=\"$userId\"",
         null,
         null
     ) ?.use {
@@ -67,7 +69,7 @@ fun XWikiUserFull.rowId(
                 ContentValues().apply {
                     put(ContactsContract.RawContacts.ACCOUNT_TYPE, Constants.ACCOUNT_TYPE)
                     put(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
-                    put(ContactsContract.RawContacts.SOURCE_ID, id)
+                    put(ContactsContract.RawContacts.SOURCE_ID, userId)
                 }
             )
             ContentUris.parseId(
@@ -184,7 +186,7 @@ fun XWikiUserFull.toContentProviderOperations(
     resolver: ContentResolver,
     accountName: String
 ): List<ContentProviderOperation> {
-    val rowId: Long = rowId(resolver, accountName)
+    val rowId: Long = rowId(id, accountName, resolver)
     
     return propertiesToContentProvider.map {
         it(rowId)

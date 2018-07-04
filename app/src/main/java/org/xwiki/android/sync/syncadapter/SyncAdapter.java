@@ -32,6 +32,7 @@ import android.util.Log;
 import org.xwiki.android.sync.Constants;
 import org.xwiki.android.sync.bean.XWikiUserFull;
 import org.xwiki.android.sync.contactdb.ContactManager;
+import org.xwiki.android.sync.contactdb.ContactsUpdatesObserver;
 import org.xwiki.android.sync.rest.XWikiHttp;
 import org.xwiki.android.sync.utils.SharedPrefsUtils;
 import org.xwiki.android.sync.utils.StringUtils;
@@ -41,6 +42,7 @@ import java.util.Date;
 import rx.Observable;
 import rx.Observer;
 
+import static org.xwiki.android.sync.AppContext.getContactsDatabase;
 import static org.xwiki.android.sync.contactdb.ContactOperationsKt.setAccountContactsVisibility;
 
 /**
@@ -144,6 +146,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         getContext().getContentResolver(),
                         account,
                         true
+                    );
+                    getContactsDatabase().getContactsVersionsTable().updateVersions(
+                        mContext.getContentResolver(),
+                        account.name
+                    );
+                    new ContactsUpdatesObserver(
+                        account.name,
+                        getContactsDatabase().getContactsVersionsTable()
                     );
                 }
 
