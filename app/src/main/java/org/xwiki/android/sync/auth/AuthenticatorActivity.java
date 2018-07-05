@@ -28,7 +28,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -59,6 +58,7 @@ import java.util.List;
 import rx.Subscription;
 
 import static org.xwiki.android.sync.AppContext.currentBaseUrl;
+import static org.xwiki.android.sync.contactdb.ContactsObserverServiceKt.initContactsChangingListener;
 
 
 /**
@@ -423,6 +423,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         setResult(RESULT_OK, intentReturn);
         Log.d(TAG, ">" + "finish return");
         // in SettingSyncViewFlipper this activity finish;
+        initContactsChangingListener(this);
     }
 
     /**

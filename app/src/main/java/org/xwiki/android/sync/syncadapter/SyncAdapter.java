@@ -32,7 +32,6 @@ import android.util.Log;
 import org.xwiki.android.sync.Constants;
 import org.xwiki.android.sync.bean.XWikiUserFull;
 import org.xwiki.android.sync.contactdb.ContactManager;
-import org.xwiki.android.sync.contactdb.ContactsUpdatesObserver;
 import org.xwiki.android.sync.rest.XWikiHttp;
 import org.xwiki.android.sync.utils.SharedPrefsUtils;
 import org.xwiki.android.sync.utils.StringUtils;
@@ -44,6 +43,7 @@ import rx.Observer;
 
 import static org.xwiki.android.sync.AppContext.getContactsDatabase;
 import static org.xwiki.android.sync.contactdb.ContactOperationsKt.setAccountContactsVisibility;
+import static org.xwiki.android.sync.contactdb.ContactsObserverServiceKt.initContactsChangingListener;
 
 /**
  * Adapter which will be used for synchronization.
@@ -138,6 +138,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // Save off the new sync date. On our next sync, we only want to receive
                     // contacts that have changed since this sync...
                     setServerSyncMarker(account, StringUtils.dateToIso8601String(new Date()));
+                    getContactsDatabase().getContactsVersionsTable().updateVersions(
+                        mContext.getContentResolver(),
+                        account.name
+                    );
                     synchronized (sync) {
                         sync[0] = new Object();
                         sync.notifyAll();
@@ -147,14 +151,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         account,
                         true
                     );
-                    getContactsDatabase().getContactsVersionsTable().updateVersions(
-                        mContext.getContentResolver(),
-                        account.name
-                    );
-                    new ContactsUpdatesObserver(
-                        account.name,
-                        getContactsDatabase().getContactsVersionsTable()
-                    );
+                    initContactsChangingListener(mContext);
                 }
 
                 @Override

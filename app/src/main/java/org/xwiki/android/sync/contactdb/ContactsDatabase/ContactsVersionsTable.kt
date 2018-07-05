@@ -101,12 +101,15 @@ class ContactsVersionsTable(
                         )
 
                         if (dbVersion != version) {
-                            updated.add(rowId)
+                            if (dbVersion < version) {
+                                updated.add(rowId)
+                            }
                             "UPDATE $contactVersionTableName SET $versionField=\"$dbVersion\" WHERE $idField=\"$id\""
                         } else {
                             null
                         }
                     } else {
+                        updated.add(rowId)
                         "INSERT INTO $contactVersionTableName " +
                             "($rowIdField,$accountNameField,$mimetypeField,$versionField) " +
                             "VALUES (\"$rowId\",\"$accountName\",\"$mimeType\",\"$version\")"
