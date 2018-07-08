@@ -24,20 +24,21 @@ class ContactsObserverService : Service() {
     private var contactsUpdatedObserver: List<ContactsUpdatesObserver>? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(this::class.java.simpleName, "onHandleIntent")
+        Log.i(this::class.java.simpleName, "onStartCommand")
         unbindObservers()
 
         val contactsUpdatesTable = AppContext.getContactsDatabase().contactsVersionsTable
         contactsUpdatedObserver = AccountManager.get(applicationContext).getAccountsByType(
             Constants.ACCOUNT_TYPE
         ).map {
+            Log.d(this::class.java.simpleName, "Register observer for ${it.name}")
             ContactsUpdatesObserver(
                 it.name,
                 contactsUpdatesTable
             ).also {
                 contentResolver.registerContentObserver(
                     ContactsContract.AUTHORITY_URI,
-                    false,
+                    true,
                     it
                 )
             }
@@ -47,6 +48,7 @@ class ContactsObserverService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        Log.i(this::class.java.simpleName, "onTaskRemoved")
         unbindObservers()
     }
 

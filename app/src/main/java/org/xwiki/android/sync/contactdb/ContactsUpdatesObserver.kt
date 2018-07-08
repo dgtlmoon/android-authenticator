@@ -19,15 +19,23 @@ class ContactsUpdatesObserver(
     private var updateAsync: Job? = null
 
     private val task: suspend CoroutineScope.() -> Unit = {
-        Log.d(this::class.java.simpleName, "Start get updates")
-        contactsVersionsTable.updateVersions(
-            AppContext.getInstance().contentResolver,
-            accountName
-        ).forEach {
-            Log.d(this::class.java.simpleName, "Was updated: $it")
+        Log.d(this@ContactsUpdatesObserver::class.java.simpleName, "Start get updates")
+        try {
+            contactsVersionsTable.updateVersions(
+                AppContext.getInstance().contentResolver,
+                accountName
+            ).also {
+                if (it.isEmpty()) {
+                    Log.d(this@ContactsUpdatesObserver::class.java.simpleName, "Nothing to update")
+                }
+            }.forEach {
+                Log.d(this@ContactsUpdatesObserver::class.java.simpleName, "Was updated: $it")
+            }
+        } catch (e: Exception) {
+            Log.e(this@ContactsUpdatesObserver::class.java.simpleName, "Can't get updated contact", e)
         }
         updateAsync = null
-        Log.d(this::class.java.simpleName, "Complete get updates")
+        Log.d(this@ContactsUpdatesObserver::class.java.simpleName, "Complete get updates")
     }
 
     init {

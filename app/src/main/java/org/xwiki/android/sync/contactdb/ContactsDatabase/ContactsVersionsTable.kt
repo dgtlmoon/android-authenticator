@@ -101,9 +101,7 @@ class ContactsVersionsTable(
                         )
 
                         if (dbVersion != version) {
-                            if (dbVersion < version) {
-                                updated.add(rowId)
-                            }
+                            updated.add(rowId)
                             "UPDATE $contactVersionTableName SET $versionField=\"$dbVersion\" WHERE $idField=\"$id\""
                         } else {
                             null
