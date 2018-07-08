@@ -19,13 +19,15 @@ class ContactsUpdatesObserver(
     private var updateAsync: Job? = null
 
     private val task: suspend CoroutineScope.() -> Unit = {
+        Log.d(this::class.java.simpleName, "Start get updates")
         contactsVersionsTable.updateVersions(
             AppContext.getInstance().contentResolver,
             accountName
         ).forEach {
-            Log.i(this::class.java.simpleName, "Was updated: $it")
+            Log.d(this::class.java.simpleName, "Was updated: $it")
         }
         updateAsync = null
+        Log.d(this::class.java.simpleName, "Complete get updates")
     }
 
     init {

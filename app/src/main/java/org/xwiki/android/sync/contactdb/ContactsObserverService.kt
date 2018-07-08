@@ -2,8 +2,10 @@ package org.xwiki.android.sync.contactdb
 
 import android.accounts.AccountManager
 import android.app.IntentService
+import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.IBinder
 import android.provider.ContactsContract
 import android.util.Log
 import org.xwiki.android.sync.AppContext
@@ -14,21 +16,14 @@ fun Context.initContactsChangingListener() {
     startService(intent)
 }
 
-class ContactsObserverService : IntentService(
-    ContactsObserverService::class.java.simpleName
-) {
-    private var contactsUpdatedObserver: List<ContactsUpdatesObserver>? = null
-
-    /**
-     *
-     * @return {@link #START_REDELIVER_INTENT} for be sure that service will be recreated
-     */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(this::class.java.simpleName, "onStartCommand")
-        return super.onStartCommand(intent, flags, startId)
+class ContactsObserverService : Service() {
+    override fun onBind(intent: Intent?): IBinder {
+        throw UnsupportedOperationException()
     }
 
-    override fun onHandleIntent(intent: Intent?) {
+    private var contactsUpdatedObserver: List<ContactsUpdatesObserver>? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(this::class.java.simpleName, "onHandleIntent")
         unbindObservers()
 
@@ -47,6 +42,7 @@ class ContactsObserverService : IntentService(
                 )
             }
         }
+        return START_REDELIVER_INTENT
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
