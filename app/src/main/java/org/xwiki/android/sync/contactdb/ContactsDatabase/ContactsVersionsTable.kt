@@ -5,6 +5,9 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 import android.provider.ContactsContract
+import android.util.Log
+import androidx.core.database.getString
+import androidx.core.database.getStringOrNull
 import androidx.core.database.sqlite.transaction
 
 private const val contactVersionTableName = "ContactsVersions"
@@ -12,7 +15,6 @@ private const val contactVersionTableName = "ContactsVersions"
 private const val idField = BaseColumns._ID
 private const val rowIdField = ContactsContract.Data.RAW_CONTACT_ID
 private const val accountNameField = ContactsContract.RawContacts.ACCOUNT_NAME
-private const val mimetypeField = ContactsContract.Data.MIMETYPE
 private const val versionField = ContactsContract.Data.DATA_VERSION
 
 /**
@@ -33,7 +35,6 @@ class ContactsVersionsTable(
                 append("$idField INTEGER PRIMARY KEY,")
                 append("$rowIdField TEXT,")
                 append("$accountNameField TEXT,")
-                append("$mimetypeField TEXT,")
                 append("$versionField TEXT")
                 append(");")
                 toString()
@@ -50,11 +51,7 @@ class ContactsVersionsTable(
         val updates = mutableListOf<String>()
         resolver.query(
             ContactsContract.Data.CONTENT_URI,
-            arrayOf(
-                ContactsContract.Data.RAW_CONTACT_ID,
-                ContactsContract.Data.MIMETYPE,
-                ContactsContract.Data.DATA_VERSION
-            ),
+            null,
             "${ContactsContract.RawContacts.ACCOUNT_NAME}=\"$accountName\"",
             null,
             null
@@ -63,8 +60,8 @@ class ContactsVersionsTable(
             val rowIdColumnIndex = contactsDataVersionsCursor.getColumnIndex(
                 ContactsContract.Data.RAW_CONTACT_ID
             )
-            val mimetypeColumnIndex = contactsDataVersionsCursor.getColumnIndex(
-                ContactsContract.Data.MIMETYPE
+            val idColumnImdex = contactsDataVersionsCursor.getColumnIndex(
+                BaseColumns._ID
             )
             val dataVersionColumnIndex = contactsDataVersionsCursor.getColumnIndex(
                 ContactsContract.Data.DATA_VERSION
@@ -74,18 +71,24 @@ class ContactsVersionsTable(
                 val rowId = contactsDataVersionsCursor.getLong(
                     rowIdColumnIndex
                 )
-                val mimeType = contactsDataVersionsCursor.getString(
-                    mimetypeColumnIndex
+
+                val originalId = contactsDataVersionsCursor.getString(
+                    idColumnImdex
                 )
+
                 val version = contactsDataVersionsCursor.getInt(
                     dataVersionColumnIndex
                 )
+
+                contactsDataVersionsCursor.getStringOrNull(ContactsContract.RawContacts.DIRTY) ?.let {
+                    if (it == "1") {
+                        Log.d(this::class.java.simpleName, "Need to synchronize: $rowId")
+                    }
+                }
                 databaseHelper.readableDatabase.query(
                     contactVersionTableName,
                     null,
-                    "$rowIdField=\"$rowId\" " +
-                        "AND $accountNameField=\"$accountName\" " +
-                        "AND $mimetypeField=\"$mimeType\"",
+                        "$idField=\"$originalId\"",
                     null,
                     null,
                     null,
@@ -109,8 +112,8 @@ class ContactsVersionsTable(
                     } else {
                         updated.add(rowId)
                         "INSERT INTO $contactVersionTableName " +
-                            "($rowIdField,$accountNameField,$mimetypeField,$versionField) " +
-                            "VALUES (\"$rowId\",\"$accountName\",\"$mimeType\",\"$version\")"
+                            "($rowIdField,$accountNameField,$idField,$versionField) " +
+                            "VALUES (\"$rowId\",\"$accountName\",\"$originalId\",\"$version\")"
                     }
                 } ?.let {
                     updates.add(it)
