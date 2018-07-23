@@ -46,7 +46,7 @@ public class StringUtils {
      * @since 0.5
      */
     private final static Pattern phonePattern = Pattern.compile(
-        "\\+?(([\\d\\-]+)|(\\([\\d\\-]+\\)))+"
+        "\\+?(-?((\\d+)|(\\(\\d+\\))))+"
     );
 
     /**
