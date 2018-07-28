@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.junit.Assert.*;
 
 /**
@@ -33,7 +34,7 @@ public class SharedPrefsUtilsTest {
 
     @Before
     public void setUp() {
-        mContext = AppContext.getInstance().getApplicationContext();
+        mContext = getInstrumentation().getContext();
     }
 
     @Before
