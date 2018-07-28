@@ -1,10 +1,11 @@
 package org.xwiki.android.sync.activities;
 
+
 import android.test.ActivityInstrumentationTestCase2;
 
 import org.junit.After;
 import org.junit.Before;
-import org.xwiki.android.sync.activities.editcontact.EditContactActivity;
+import org.xwiki.android.sync.activities.EditContact.EditContactActivity;
 
 /**
  * EditContactActivityTest
