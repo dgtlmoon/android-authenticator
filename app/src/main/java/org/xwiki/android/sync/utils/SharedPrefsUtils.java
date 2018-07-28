@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -125,7 +127,12 @@ public class SharedPrefsUtils {
      * @param key Key to add
      * @param list Value to add
      */
-    public static void putArrayList(Context context, String key, List<String> list) {
+
+    public static void putArrayList(
+        @NotNull Context context,
+        @NotNull String key,
+        @NotNull List<String> list
+    ) {
         SharedPreferences sp = context.getSharedPreferences(SETTING, Context.MODE_PRIVATE);
         Editor edit = sp.edit();
         Set<String> set = new HashSet<>(list);
