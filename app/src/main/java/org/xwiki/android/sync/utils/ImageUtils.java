@@ -48,22 +48,23 @@ public class ImageUtils {
      */
     public static Bitmap compressByQuality(Bitmap bitmap, int maxSize) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int quality = 100;
-        bitmap.compress(CompressFormat.JPEG, quality, baos);
-        Log.d(TAG, "the size before compressing：" + baos.toByteArray().length + "byte");
+        bitmap.compress(CompressFormat.JPEG, 100, baos);
+        Log.d(TAG, "the size before compressing：" + baos.size() + "byte");
         boolean isCompressed = false;
-        while (baos.toByteArray().length / 1024 > maxSize) {
-            quality -= 10;
+        final int additionalQualityDifference = 1;
+        final int baseQualityDifference = (int) ((float) maxSize / (baos.size() / 1024) * 100);
+        int quality = baseQualityDifference;
+        while (baos.size() / 1024 > maxSize) {
             baos.reset();
             bitmap.compress(CompressFormat.JPEG, quality, baos);
-            Log.d(TAG, "quality:" + quality + "%, size："
-                    + baos.toByteArray().length + "byte");
+            Log.d(TAG, "quality:" + quality + "%, size：" + baos.size() + "byte");
             isCompressed = true;
+            quality -= additionalQualityDifference;
         }
-        Log.d(TAG, "the size after compressing：" + baos.toByteArray().length + "byte");
+        Log.d(TAG, "the size after compressing：" + baos.size() + "byte");
         if (isCompressed) {
             Bitmap compressedBitmap = BitmapFactory.decodeByteArray(
-                    baos.toByteArray(), 0, baos.toByteArray().length);
+                    baos.toByteArray(), 0, baos.size());
             bitmap.recycle();
             return compressedBitmap;
         } else {
