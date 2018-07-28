@@ -130,9 +130,8 @@ public class StringUtils {
         try {
             return sdf.parse(iso8601);
         } catch (ParseException e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     /**
