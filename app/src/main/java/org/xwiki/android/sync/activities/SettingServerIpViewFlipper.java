@@ -58,6 +58,8 @@ public class SettingServerIpViewFlipper extends BaseViewFlipper {
         String serverAddress = checkInput();
         if (serverAddress != null) {
             SharedPrefsUtils.putValue(mContext, Constants.SERVER_ADDRESS, serverAddress);
+        } else {
+            throw new IllegalStateException("Wrong server ip");
         }
     }
 

@@ -227,13 +227,17 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     public void doNext(View view) {
         Integer position = mViewFlipper.getDisplayedChild();
         chooseAnimation(true);
-        flippers.get(
-            position
-        ).doNext();
-        if (position + 1 >= orderOfFlippers.size()) {
-            finish();
+        try {
+            flippers.get(
+                position
+            ).doNext();
+            if (position + 1 >= orderOfFlippers.size()) {
+                finish();
+            }
+            showViewFlipper(position + 1);
+        } catch (Exception e) {
+            Log.e(TAG, "Can't perform doNext correctly", e);
         }
-        showViewFlipper(position + 1);
     }
 
     /**

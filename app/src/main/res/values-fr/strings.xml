@@ -23,7 +23,7 @@
 
     <string name="error_invalid_server">L\'adresse du serveur est invalide</string>
     <string name="error_invalid_email">Cette adresse e-mail n\'est pas valide</string>
-    <string name="error_invalid_password">Ce mot de passe est trop court</string>
+    <string name="error_password_short">Ce mot de passe est trop court</string>
     <string name="error_incorrect_password">Ce mot de passe est incorrect\t</string>
     <string name="error_field_required">Ce champ est requis</string>
 

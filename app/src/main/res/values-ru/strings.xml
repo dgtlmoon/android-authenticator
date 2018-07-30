@@ -23,7 +23,7 @@
     <string name="title_activity_setting">Настройки</string>
 
     <string name="error_invalid_server">Не верный адрес сервера</string>
-    <string name="error_invalid_password">Пароль слишком короткий</string>
+    <string name="error_password_short">Пароль слишком короткий</string>
     <string name="error_incorrect_password">Не верный пароль</string>
     <string name="error_field_required">Это поле обязательно</string>
 

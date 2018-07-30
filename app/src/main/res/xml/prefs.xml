@@ -21,8 +21,9 @@
 -->
 
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="XWiki Authenticator Preferences" > </PreferenceCategory>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="XWiki Authenticator Preferences"/>
     <PreferenceScreen android:key="account_settings"
         android:title="Settings"
         android:summary="Configure the synchronization of your account">

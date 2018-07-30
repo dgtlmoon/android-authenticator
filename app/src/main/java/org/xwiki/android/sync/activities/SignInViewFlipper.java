@@ -110,16 +110,18 @@ public class SignInViewFlipper extends BaseViewFlipper {
         passwordEditText.setError(null);
         accountName = nameEditText.getText().toString();
         accountPassword = passwordEditText.getText().toString();
+        Boolean correct = true;
         if (TextUtils.isEmpty(accountName)) {
             nameEditText.requestFocus();
             nameEditText.setError(mContext.getString(R.string.error_field_required));
-            return false;
-        } else if (TextUtils.isEmpty(accountPassword) || accountPassword.length() < 5) {
-            passwordEditText.requestFocus();
-            passwordEditText.setError(mContext.getString(R.string.error_invalid_password));
-            return false;
+            correct = false;
         }
-        return true;
+        if (TextUtils.isEmpty(accountPassword) || accountPassword.length() < 5) {
+            passwordEditText.requestFocus();
+            passwordEditText.setError(mContext.getString(R.string.error_password_short));
+            correct = false;
+        }
+        return correct;
     }
 
     /**

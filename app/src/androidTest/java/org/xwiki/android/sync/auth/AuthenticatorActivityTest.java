@@ -1,85 +1,153 @@
 package org.xwiki.android.sync.auth;
 
-import android.accounts.AccountAuthenticatorResponse;
-import android.accounts.AccountManager;
-import android.content.Intent;
-import android.os.Bundle;
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.View;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.support.test.rule.ActivityTestRule;
 
-import com.robotium.solo.Solo;
-
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.xwiki.android.sync.Constants;
 import org.xwiki.android.sync.R;
 
-import static org.junit.Assert.*;
+import static android.support.test.espresso.action.ViewActions.clearText;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.hasErrorText;
+import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /**
  * AuthenticatorActivityTest
  */
-public class AuthenticatorActivityTest extends ActivityInstrumentationTestCase2<AuthenticatorActivity> {
-    private Solo solo;
+public class AuthenticatorActivityTest {
+    public static final Integer serverPort = 9001;
+    public static final String serverIp = "http://localhost:" + serverPort + "/xwiki";
+    public static final String username = "test";
+    public static final String password = "testtest";
 
-    public AuthenticatorActivityTest(){
-        super(AuthenticatorActivity.class);
-    }
+    @Rule
+    public ActivityTestRule<AuthenticatorActivity> mActivityRule = new ActivityTestRule<>(
+        AuthenticatorActivity.class
+    );
 
-    public AuthenticatorActivityTest(Class<AuthenticatorActivity> activityClass) {
-        super(activityClass);
-    }
-
-    @Override
-    public AuthenticatorActivity getActivity() {
-        //pass data params.
-        AuthenticatorActivity authenticatorActivity;
-        Bundle bundle = new Bundle();
-        //AccountAuthenticatorResponse response = new AccountAuthenticatorResponse(null);
-        String authTokenType = Constants.AUTHTOKEN_TYPE_FULL_ACCESS + "android.uid.system";
-        bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
-        bundle.putString(AuthenticatorActivity.KEY_AUTH_TOKEN_TYPE, authTokenType);
-        //bundle.putParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-        bundle.putBoolean(AuthenticatorActivity.IS_SETTING_SYNC_TYPE, false);
-        authenticatorActivity = launchActivity("org.xwiki.android.sync", AuthenticatorActivity.class, bundle);
-        setActivity(authenticatorActivity);
-        return super.getActivity();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        //setUp() is run before a test case is started.
-        //This is where the solo object is created.
-        solo = new Solo(getInstrumentation());
-        getActivity();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        //tearDown() is run after a test case has finished.
-        //finishOpenedActivities() will finish all the activities that have been opened during the test execution.
-        solo.finishOpenedActivities();
+    @Test
+    public void wrongServerIpShowError() {
+        ViewInteraction serverTextViewInteraction = Espresso.onView(
+            withId(R.id.accountServer)
+        ).perform(
+            clearText(),
+            typeText("127.0.0.1:9001")
+        );
+        Espresso.onView(
+            withText(R.string.next)
+        ).perform(
+            click()
+        );
+        serverTextViewInteraction.check(
+            matches(
+                hasErrorText(
+                    mActivityRule.getActivity().getString(R.string.error_invalid_server)
+                )
+            )
+        );
     }
 
     @Test
-    public void testVisibleUI(){
-        //Unlock the lock screen
-        //solo.unlockScreen();
-        //test view setting or sign
-        //View passwordEditText = solo.getView(R.id.accountPassword);
-        //assertTrue(passwordEditText.getVisibility() == View.VISIBLE);
+    public void correctServerIpEmptyUsernameAndPasswordShowErrorEmptyField() {
+        typeCorrectServerIdAndOpenSignIn();
+
+        ViewInteraction usernameViewInteraction = Espresso.onView(
+            withId(R.id.accountName)
+        ).perform(
+            clearText()
+        );
+
+
+        ViewInteraction passwordViewInteraction = Espresso.onView(
+            withId(R.id.accountPassword)
+        ).perform(
+            clearText()
+        );
+
+        Espresso.onView(
+            withId(R.id.signInButton)
+        ).perform(
+            click()
+        );
+
+        usernameViewInteraction.check(
+            matches(
+                hasErrorText(
+                    mActivityRule.getActivity().getString(R.string.error_field_required)
+                )
+            )
+        );
+
+        passwordViewInteraction.check(
+            matches(
+                hasErrorText(
+                    mActivityRule.getActivity().getString(R.string.error_password_short)
+                )
+            )
+        );
     }
 
     @Test
-    public void testSignIn(){
+    public void correctServerIpOpenSignInViewFlipper() {
+        typeCorrectServerIdAndOpenSignIn();
 
+        Espresso.onView(
+            withId(R.id.signInButton)
+        ).check(
+            matches(
+                withEffectiveVisibility(
+                    ViewMatchers.Visibility.VISIBLE
+                )
+            )
+        );
     }
 
     @Test
-    public void testSignUp(){
+    public void correctServerIpAndUsernameAndPasswordCloseActivity() {
+        typeCorrectServerIdAndOpenSignIn();
 
+        Espresso.onView(
+            withId(R.id.accountName)
+        ).perform(
+            clearText(),
+            typeText(
+                username
+            )
+        );
+        Espresso.onView(
+            withId(R.id.accountPassword)
+        ).perform(
+            clearText(),
+            typeText(
+                password
+            )
+        );
+
+        Espresso.onView(
+            withId(R.id.signInButton)
+        ).perform(
+            click()
+        );
     }
 
-
+    private void typeCorrectServerIdAndOpenSignIn() {
+        Espresso.onView(
+            withId(R.id.accountServer)
+        ).perform(
+            clearText(),
+            typeText(serverIp)
+        );
+        Espresso.onView(
+            withText(R.string.next)
+        ).perform(
+            click()
+        );
+    }
 }
